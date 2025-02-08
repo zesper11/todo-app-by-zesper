@@ -1,85 +1,74 @@
-// Get elements from the DOM
-const addButton = document.getElementById('add-btn');
+const todoForm = document.querySelector('form');
 const todoInput = document.getElementById('todo-input');
-const todoList = document.getElementById('todo-list');
+const todoListUL = document.getElementById('todo-list');
 
-// Load tasks from localStorage
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let allTodos = getTodos();
+updateTodoList();
 
-// Display tasks from the tasks array
-function displayTasks() {
-    todoList.innerHTML = ''; // Clear the list before rendering
+todoForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    addTodo();
+})
 
-    // Loop through each task and add it to the list
-    for (let i = 0; i < tasks.length; i++) {
-        const task = tasks[i];
-
-        // Create new list item for the task
-        const newTask = document.createElement('li');
-        newTask.textContent = task.text;
-
-        // Create the delete button
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'X';
-        deleteButton.classList.add('delete-btn');
-        
-        // Add the delete button to the list item
-        newTask.appendChild(deleteButton);
-
-        // Add the task to the list
-        todoList.appendChild(newTask);
-
-        // When the delete button is clicked, delete the task
-        deleteButton.onclick = function() {
-            deleteTask(i); // Call delete function
-        };
-    }
+function addTodo(){
+    const todoText = todoInput.value.trim();
+    if(todoText.length > 0){
+        const todoObject = {
+            text: todoText,
+            completed: false
+        }
+        allTodos.push(todoObject);
+        updateTodoList();
+        saveTodos();
+        todoInput.value = "";
+    }  
 }
-
-// Add a new task
-function addTask() {
-    const taskText = todoInput.value.trim(); // Get input value and remove extra spaces
-
-    if (taskText === '') {
-        alert('Please enter a task!');
-        return; // Do nothing if input is empty
-    }
-
-    // Add new task to the tasks array
-    tasks.push({ text: taskText });
-
-    // Save tasks to localStorage
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-
-    // Clear input field
-    todoInput.value = '';
-
-    // Display the updated task list
-    displayTasks();
+function updateTodoList(){
+    todoListUL.innerHTML = "";
+    allTodos.forEach((todo, todoIndex)=>{
+        todoItem = createTodoItem(todo, todoIndex);
+        todoListUL.append(todoItem);
+    })
 }
-
-// Delete a task
-function deleteTask(index) {
-    // Remove the task from the array using splice
-    tasks.splice(index, 1);
-
-    // Save the updated tasks array to localStorage
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-
-    // Display the updated task list
-    displayTasks();
+function createTodoItem(todo, todoIndex){
+    const todoId = "todo-"+todoIndex;
+    const todoLI = document.createElement("li");
+    const todoText = todo.text;
+    todoLI.className = "todo";
+    todoLI.innerHTML = `
+        <input type="checkbox" id="${todoId}">
+        <label class="custom-checkbox" for="${todoId}">
+            <svg fill="transparent" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+        </label>
+        <label for="${todoId}" class="todo-text">
+            ${todoText}
+        </label>
+        <button class="delete-button">
+            <svg fill="var(--secondary-color)" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+        </button>
+    `
+    const deleteButton = todoLI.querySelector(".delete-button");
+    deleteButton.addEventListener("click", ()=>{
+        deleteTodoItem(todoIndex);
+    })
+    const checkbox = todoLI.querySelector("input");
+    checkbox.addEventListener("change", ()=>{
+        allTodos[todoIndex].completed = checkbox.checked;
+        saveTodos();
+    })
+    checkbox.checked = todo.completed;
+    return todoLI;
 }
-
-// Event listener for the "Add Task" button
-addButton.addEventListener('click', addTask);
-
-// Event listener for pressing Enter to add a task
-todoInput.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        addTask();
-    }
-});
-
-// Initial call to display tasks when the page loads
-displayTasks();
-
+function deleteTodoItem(todoIndex){
+    allTodos = allTodos.filter((_, i)=> i !== todoIndex);
+    saveTodos();
+    updateTodoList();
+}
+function saveTodos(){
+    const todosJson = JSON.stringify(allTodos);
+    localStorage.setItem("todos", todosJson);
+}
+function getTodos(){
+    const todos = localStorage.getItem("todos") || "[]";
+    return JSON.parse(todos);
+}
