@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple To-Do List</title>
+    <title>Todo App</title>
+    <link rel="icon" type="image/png" href="../images/favicon.png">
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="app-container">
-        <h1>My To-Do List</h1>
-        <input type="text" id="todo-input" placeholder="Add a new task" />
-        <button id="add-btn">Add Task</button>
-
-        <ul id="todo-list"></ul>
+    <h1>Todo App</h1>
+    <div class="wrapper">
+        <form>
+            <input id="todo-input" type="text" 
+            placeholder="write anything and hit enter to add" autocomplete="off">
+            <button id="add-button">ADD</button>
+        </form>
+        <ul id="todo-list">
+            
+        </ul>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
-
